@@ -10,6 +10,7 @@ import Data.Semigroup ((<>))
 
 data Args = Args 
     { fname :: String
+    , addr :: String
     , numwords :: Int } deriving (Eq, Show)
 
 
@@ -20,6 +21,13 @@ arg = Args
         <> short 'f'
         <> metavar "FILENAME"
         <> help "File containing filter words" )
+    <*> strOption
+        ( long "address"
+        <> short 'a'
+        <> metavar "ADDR"
+        <> showDefault
+        <> value "http://hckrnews.com"
+        <> help "Address of web-page to analyze" )
     <*> option auto
         ( long "words"
         <> help "Number of top words to show"
@@ -32,13 +40,9 @@ arg = Args
 type WordFrequency = [(String, Int)]
 
 
-newsurl :: String
-newsurl = "http://hckrnews.com"
-
-
-getMainPage :: IO String
-getMainPage = do
-    resp <- HTTP.simpleHTTP (HTTP.getRequest newsurl)
+getMainPage :: String -> IO String
+getMainPage p = do
+    resp <- HTTP.simpleHTTP (HTTP.getRequest p)
     HTTP.getResponseBody resp
 
 
@@ -91,7 +95,7 @@ main = do
     args <- execParser opts
 
     fd <- readFile (fname args)
-    mp <- getMainPage
+    mp <- getMainPage (addr args)
     let fw = lines fd
         h = filterWords fw . sortHist . histogram . getWords . getHeadlines . splitOnBlocks . getHTMLBody $ mp
     prettyPrint h (numwords args)
