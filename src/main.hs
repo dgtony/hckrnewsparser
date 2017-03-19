@@ -1,6 +1,6 @@
 import qualified Network.HTTP as HTTP
 import Data.List.Split (splitOn)
-import Data.List (isInfixOf, sortBy, reverse)
+import Data.List (isInfixOf, sortBy, reverse, foldl')
 import Data.Char (toLower)
 import qualified Data.Map as Map
 
@@ -67,8 +67,8 @@ getWords = map (map toLower) . concatMap words
 
 
 histogram :: [String] -> Map.Map String Int
-histogram = foldr helper Map.empty
-    where helper w acc = if Map.member w acc
+histogram = foldl' helper Map.empty
+    where helper acc w = if Map.member w acc
                             then Map.update (\ n -> Just (n + 1)) w acc
                             else Map.insert w 1 acc
 

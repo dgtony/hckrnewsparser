@@ -6,4 +6,5 @@ dist/
 
 *.prof
 *.hp
-
+*.ps
+*.aux
